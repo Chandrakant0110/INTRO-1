@@ -41,10 +41,6 @@
               android:resource="@drawable/launch_background"
               />
 
-            <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1826259758098596/5351900384"/>
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -57,6 +53,9 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-1826259758098596~3795900858"/>
 
 
     </application>
