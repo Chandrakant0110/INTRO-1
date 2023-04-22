@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   BannerAd? _bannerAd;
+  InterstitialAd? _interstitialAd;
 
   @override
   void didChangeDependencies() {
@@ -41,9 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
       super.setState(fn);
     }
   }
+
   @override
   void initState() {
-
+    super.initState();
     // TODO: Load a banner ad
     BannerAd(
       adUnitId: AdHelper.bannerAdUnitId,
@@ -61,11 +63,38 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     ).load();
+
+    _loadInterstitialAd();
   }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              HomeScreen();
+            },
+          );
+
+          setState(() {
+            _interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
   @override
   void dispose() {
     // TODO: Dispose a BannerAd object
     _bannerAd?.dispose();
+    _interstitialAd?.dispose();
 
     super.dispose();
   }
@@ -89,8 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Theme.of(context).primaryColor,
           actions: [
             IconButton(
-                onPressed:(){
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => Search()));
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => Search()));
                 },
                 icon: Icon(Icons.search)),
             IconButton(
@@ -100,18 +130,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 icon: Icon(Icons.logout))
           ]),
-      body:Align(
+      body: Align(
         alignment: Alignment.topLeft,
         child: Column(
           children: [
             ContactList(),
-            if (_bannerAd != null)
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                width: _bannerAd!.size.width.toDouble(),
-                height: _bannerAd!.size.height.toDouble(),
-                child: AdWidget(ad: _bannerAd!),
+            if (_bannerAd != null || _interstitialAd != null)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd!),
+                ),
+              ),
+            ElevatedButton(
+              onPressed: () {
+                if (_interstitialAd != null) {
+                  _interstitialAd?.show();
+                } else {
+                  HomeScreen();
+                  print("interstitial ad not popped");
+                }
+              },
+              child: Text(
+                "pop  ",
               ),
             ),
           ],

@@ -39,14 +39,14 @@ class Database with ChangeNotifier {
     DocumentSnapshot snapshot =
         await firestore.collection("user").doc(uid).get();
     print(snapshot.data());
-    if(snapshot.data()==null )return null;
-    Map<String, dynamic> data = snapshot.data() as Map<String,dynamic>;
-
+    if (snapshot.data() == null) return null;
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
     print("name got ");
-    print(data!['Name']);
-    return data!['Name'];
+    print(data['Name']);
+    return data['Name'];
   }
+
   Future<Map<String, dynamic>> getCurrentUserGroup() async {
     String? uid = Authentication().userId();
     if (uid == null) uid = FirebaseAuth.instance.currentUser!.uid;
@@ -92,11 +92,9 @@ class Database with ChangeNotifier {
       throw e;
     }
 
-    QuerySnapshot snapshot = await firestore
-        .collection('user')
-        .orderBy('Name')
-        .get();
-    print(snapshot);
+    QuerySnapshot snapshot =
+        await firestore.collection('user').orderBy('Name').get();
+    // print(snapshot);
     List<QueryDocumentSnapshot> documents = snapshot.docs;
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -125,6 +123,24 @@ class Database with ChangeNotifier {
       }));
     }
     return correct;
+  }
+
+  Future<List<String>> getUserName() async {
+    List<String> username = [];
+    final snapshot = await firestore.collection('user').get();
+    // snapshot.forEach((element) {element.docs.forEach((data) {data.data()[]})});
+    // snapshot.data()!.forEach((key, value) {
+    //   if (key == "user_name") {
+    //     username.add(value);
+    //   }
+    // });
+    // print(username);
+    final list = snapshot.docs.map((e) => e.data()).toList();
+    list.forEach((element) {
+      username.add(element["user_name"].toString());
+    });
+    // print(snapshot.data());
+    return username;
   }
 
   Future<void> userTestMarksDataUpload(
@@ -172,7 +188,7 @@ class Database with ChangeNotifier {
 
 // fun to upload user personal data to databse
   Future<void> userPersonalDataUpload(
-      String name, String gender, DateTime dob,String username) async {
+      String name, String gender, DateTime dob, String username) async {
     String? uid = Authentication().userId();
     try {
       await firestore.collection("user").doc(uid).set({
